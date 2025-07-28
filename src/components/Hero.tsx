@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Vote, Users, BarChart3 } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-image.jpg";
 
 const Hero = () => {
@@ -60,12 +61,16 @@ const Hero = () => {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button variant="hero" size="lg" className="text-lg px-8 py-4">
-            Iniciar Sesión
-            <ArrowRight className="ml-2 w-5 h-5" />
+          <Button variant="hero" size="lg" className="text-lg px-8 py-4" asChild>
+            <Link to="/auth">
+              Acceder al Sistema
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
           </Button>
-          <Button variant="outline" size="lg" className="text-lg px-8 py-4 bg-white/10 border-white/30 text-white hover:bg-white/20">
-            Ver Demo
+          <Button variant="outline" size="lg" className="text-lg px-8 py-4 bg-white/10 border-white/30 text-white hover:bg-white/20" asChild>
+            <Link to="/auth">
+              Registrarse Gratis
+            </Link>
           </Button>
         </div>
 

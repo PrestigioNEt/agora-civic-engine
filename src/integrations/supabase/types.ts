@@ -14,16 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          capabilities: Json | null
+          created_at: string
+          email: string
+          full_name: string | null
+          hierarchy: number | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          capabilities?: Json | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          hierarchy?: number | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          capabilities?: Json | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          hierarchy?: number | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
+      get_role_capabilities: {
+        Args: { role_name: Database["public"]["Enums"]["user_role"] }
+        Returns: Json
+      }
+      get_role_hierarchy: {
+        Args: { role_name: Database["public"]["Enums"]["user_role"] }
+        Returns: number
+      }
+      has_role_level: {
+        Args: { min_level: number }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role:
+        | "VOTER"
+        | "VOLUNTEER"
+        | "LEADER"
+        | "COORDINATOR"
+        | "ADMIN"
+        | "MASTER_DEVELOPER"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +206,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: [
+        "VOTER",
+        "VOLUNTEER",
+        "LEADER",
+        "COORDINATOR",
+        "ADMIN",
+        "MASTER_DEVELOPER",
+      ],
+    },
   },
 } as const

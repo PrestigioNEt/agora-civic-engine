@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { 
   Menu, 
   X, 
@@ -7,12 +8,17 @@ import {
   Users, 
   Settings, 
   MapPin,
-  Brain
+  Brain,
+  LogOut,
+  User
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, profile, signOut } = useAuth();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -29,7 +35,7 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
+          <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div className="bg-gradient-primary p-2 rounded-lg shadow-primary">
               <Vote className="w-6 h-6 text-white" />
             </div>
@@ -37,29 +43,54 @@ const Navigation = () => {
               <span className="text-2xl font-bold text-primary">AGORA</span>
               <span className="text-xs text-muted-foreground ml-2">2025</span>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className="flex items-center space-x-2 text-foreground hover:text-primary transition-smooth px-3 py-2 rounded-md hover:bg-secondary/50"
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="font-medium">{item.name}</span>
-                </a>
-              );
-            })}
+            {user && profile && navigationItems
+              .filter(item => profile.capabilities.menus.includes(item.name.toLowerCase()) || item.name === 'Dashboard')
+              .map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="flex items-center space-x-2 text-foreground hover:text-primary transition-smooth px-3 py-2 rounded-md hover:bg-secondary/50"
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="font-medium">{item.name}</span>
+                  </Link>
+                );
+              })}
           </div>
 
-          {/* Desktop Auth Buttons */}
+          {/* Desktop Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost">Iniciar Sesión</Button>
-            <Button variant="political">Panel de Control</Button>
+            {user && profile ? (
+              <>
+                <Badge variant="secondary" className="text-xs">
+                  {profile.role}
+                </Badge>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/dashboard">
+                    <User className="w-4 h-4 mr-2" />
+                    Panel
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" onClick={signOut}>
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/auth">Iniciar Sesión</Link>
+                </Button>
+                <Button variant="political" asChild>
+                  <Link to="/auth">Registrarse</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -79,28 +110,56 @@ const Navigation = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <div className="space-y-2">
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="flex items-center space-x-3 px-4 py-3 text-foreground hover:text-primary hover:bg-secondary/50 rounded-lg transition-smooth"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{item.name}</span>
-                  </a>
-                );
-              })}
-              <div className="border-t border-border mt-4 pt-4 space-y-2">
-                <Button variant="ghost" className="w-full justify-start">
-                  Iniciar Sesión
-                </Button>
-                <Button variant="political" className="w-full">
-                  Panel de Control
-                </Button>
-              </div>
+              {user && profile && (
+                <div className="px-4 py-2 bg-secondary/30 rounded-lg mx-4 mb-4">
+                  <p className="text-sm font-medium text-foreground">
+                    {profile.full_name || profile.email}
+                  </p>
+                  <Badge variant="secondary" className="text-xs mt-1">
+                    {profile.role}
+                  </Badge>
+                </div>
+              )}
+              
+              {user && profile ? (
+                <>
+                  {navigationItems
+                    .filter(item => profile.capabilities.menus.includes(item.name.toLowerCase()) || item.name === 'Dashboard')
+                    .map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <Link
+                          key={item.name}
+                          to={item.href}
+                          className="flex items-center space-x-3 px-4 py-3 text-foreground hover:text-primary hover:bg-secondary/50 rounded-lg transition-smooth"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          <Icon className="w-5 h-5" />
+                          <span className="font-medium">{item.name}</span>
+                        </Link>
+                      );
+                    })}
+                  <div className="border-t border-border mt-4 pt-4 space-y-2">
+                    <Button variant="ghost" className="w-full justify-start" onClick={signOut}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Cerrar Sesión
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="border-t border-border mt-4 pt-4 space-y-2">
+                  <Button variant="ghost" className="w-full justify-start" asChild>
+                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                      Iniciar Sesión
+                    </Link>
+                  </Button>
+                  <Button variant="political" className="w-full" asChild>
+                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                      Registrarse
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}
