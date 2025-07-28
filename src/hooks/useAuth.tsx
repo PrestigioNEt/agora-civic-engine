@@ -8,7 +8,7 @@ interface Profile {
   user_id: string;
   email: string;
   full_name?: string;
-  role: 'VOTER' | 'VOLUNTEER' | 'LEADER' | 'COORDINATOR' | 'ADMIN' | 'MASTER_DEVELOPER';
+  role: string;
   hierarchy: number;
   capabilities: {
     permissions: string[];
@@ -49,7 +49,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          roles (
+            name,
+            hierarchy,
+            capabilities
+          )
+        `)
         .eq('user_id', userId)
         .single();
 
@@ -58,7 +65,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
       
-      return data as Profile;
+      // Aplanar la respuesta
+      const profileData = {
+        ...data,
+        role: data.roles.name,
+        hierarchy: data.roles.hierarchy,
+        capabilities: data.roles.capabilities,
+      };
+      delete profileData.roles;
+
+      return profileData as Profile;
     } catch (error) {
       console.error('Error in fetchProfile:', error);
       return null;
