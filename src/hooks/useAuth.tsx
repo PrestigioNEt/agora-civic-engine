@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -28,9 +28,9 @@ interface AuthContextType {
   profile: Profile | null;
   session: Session | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
-  signOut: () => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: AuthError | null }>;
+  signOut: () => Promise<{ error: AuthError | null }>;
   hasPermission: (permission: string) => boolean;
   hasFeature: (feature: string) => boolean;
   hasMinRole: (minHierarchy: number) => boolean;
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error };
     } catch (error) {
       console.error('SignIn error:', error);
-      return { error };
+      return { error: error as AuthError };
     }
   };
 
@@ -157,7 +157,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error };
     } catch (error) {
       console.error('SignUp error:', error);
-      return { error };
+      return { error: error as AuthError };
     }
   };
 
@@ -176,7 +176,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error };
     } catch (error) {
       console.error('SignOut error:', error);
-      return { error };
+      return { error: error as AuthError };
     }
   };
 
